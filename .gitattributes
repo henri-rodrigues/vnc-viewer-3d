@@ -1,0 +1,9 @@
+*.bat eol=crlf
+*.ps1 eol=crlf
+*.vbs eol=crlf
+*.ico binary
+*.msi binary
+*.woff2 binary
+# Terceiros: guardados byte a byte (o SBOM confere o SHA256)
+vendor/** -text
+public/fonts/** -text

@@ -1,0 +1,14 @@
+TightVNC Server 2.8.89 (64 bits) - instalador oficial, sem modificações.
+
+Arquivo:   tightvnc-2.8.89-gpl-setup-64bit.msi
+Origem:    https://www.tightvnc.com/download/2.8.89/tightvnc-2.8.89-gpl-setup-64bit.msi
+SHA256:    dff8d7e40a81e0b86ba1d9d5cc0d4f22d08354c50c9cbdc0825bbb6ccfb1073c
+Assinado:  OOO GlavSoft (assinatura digital Authenticode válida)
+
+O programa confere o SHA256 e a assinatura antes de instalar. Se o arquivo for
+alterado, a instalação é recusada.
+
+Licença: GNU GPL v2 (https://www.gnu.org/licenses/old-licenses/gpl-2.0.html).
+Código-fonte: https://www.tightvnc.com/download.php
+
+Para atualizar: substitua o .msi e ajuste o nome e o SHA256 em host.js.

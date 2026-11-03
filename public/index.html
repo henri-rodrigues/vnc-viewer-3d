@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Acesso Remoto · 3D Ar Condicionado</title>
+<link rel="icon" href="icon.ico">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header id="topbar">
+  <a class="brand" href="https://3darcondicionado.com.br/" target="_blank" rel="noopener">
+    <img class="logo" src="logo.png" alt="3D Ar Condicionado - Engenharia Térmica">
+  </a>
+  <span class="product">Acesso Remoto</span>
+</header>
+
+<div id="layout">
+  <aside id="sidebar">
+    <form id="form" autocomplete="off">
+      <h2><span id="formTitle">Nova conexão</span> <button type="button" id="cancelEdit" class="link" hidden>Cancelar edição</button></h2>
+      <label>Nome <input id="name" placeholder="Ex.: PC da engenharia"></label>
+      <label>Grupo <input id="group" list="groups" placeholder="Geral"></label>
+      <datalist id="groups"></datalist>
+      <div class="row">
+        <label class="grow">Host / IP <input id="host" required placeholder="192.168.0.10"></label>
+        <label class="port">Porta <input id="port" type="number" value="5900" min="5900" max="5999" required title="Portas VNC: 5900 a 5999"></label>
+      </div>
+      <label>Senha de acesso <input id="password" type="password" placeholder="(não é salva)"></label>
+      <div class="row">
+        <button type="submit" class="primary grow">Conectar</button>
+        <button type="button" id="save">Salvar</button>
+      </div>
+    </form>
+
+    <section>
+      <h2>Computadores salvos <button type="button" id="reload" class="link" title="Recarregar conexoes.csv">↻</button></h2>
+      <div id="company"></div>
+    </section>
+
+    <section id="host" class="card">
+      <h2>Este computador <button type="button" id="hostRefresh" class="link" title="Atualizar">↻</button></h2>
+      <p id="hostState" class="state">Verificando…</p>
+
+      <div id="hostInfo" hidden>
+        <p class="muted">Outras pessoas conectam em:</p>
+        <ul id="hostIps" class="ips"></ul>
+      </div>
+
+      <div id="hostWarn" class="warn" hidden role="alert">
+        <b>Ninguém consegue acessar por esta rede</b>
+        <p>O Windows marcou <span id="hostWarnNet"></span> como <b>rede Pública</b>, e nela o firewall bloqueia
+          o acesso. Se esta é a rede da empresa, mude para <b>Rede privada</b>:
+          Configurações → Rede e Internet → (sua rede) → Tipo de perfil de rede.</p>
+        <button type="button" id="hostNetwork">Abrir configurações de rede</button>
+      </div>
+
+      <form id="hostInstall" hidden autocomplete="off">
+        <p class="muted">Ativa o acesso remoto para que outras pessoas da empresa possam acessar este PC.
+          O acesso fica liberado só para a rede local.</p>
+        <label>Senha de acesso (6 a 8 caracteres)
+          <input id="hostPassword" type="password" minlength="6" maxlength="8" required>
+        </label>
+        <label>Senha de administração (outra, para mudar configurações)
+          <input id="hostAdminPassword" type="password" minlength="6" maxlength="8" required>
+        </label>
+        <button type="submit" class="primary">Permitir acesso a este PC</button>
+      </form>
+
+      <div id="hostControls" class="row" hidden>
+        <button type="button" id="hostToggle" class="grow"></button>
+        <button type="button" id="hostConfig" title="Configurações avançadas do acesso remoto (pede a senha de administração)">Configurar</button>
+      </div>
+      <p id="hostMsg" class="muted"></p>
+    </section>
+  </aside>
+
+  <main id="stage">
+    <div id="toolbar" hidden>
+      <span id="status">Desconectado</span>
+      <span class="spacer"></span>
+      <label title="Rápida usa menos rede, com imagem mais borrada">Velocidade
+        <select id="speed">
+          <option value="rapida">Rápida (rede lenta)</option>
+          <option value="equilibrada">Equilibrada</option>
+          <option value="qualidade">Qualidade</option>
+        </select>
+      </label>
+      <label><input type="checkbox" id="scale" checked> Ajustar à janela</label>
+      <label><input type="checkbox" id="viewonly"> Só visualizar</label>
+      <label title="Permite que o computador remoto copie texto para a sua área de transferência"><input type="checkbox" id="recvclip"> Receber cópias do remoto</label>
+      <button id="cad" title="Enviar Ctrl+Alt+Del">Ctrl+Alt+Del</button>
+      <button id="clip" title="Enviar o texto da sua área de transferência">Colar remoto</button>
+      <button id="fullscreen">Tela cheia</button>
+      <button id="disconnect" class="danger">Desconectar</button>
+    </div>
+    <div id="screen">
+      <div id="hint">
+        <img src="logo.png" alt="">
+        <p>Escolha um computador ao lado ou digite o IP para conectar.</p>
+        <small>O outro computador precisa estar com o acesso remoto ativado (painel "Este computador").</small>
+      </div>
+    </div>
+  </main>
+</div>
+
+<dialog id="pwDialog">
+  <form method="dialog">
+    <h2>Senha de acesso</h2>
+    <p class="muted">Computador: <b id="pwTarget"></b></p>
+    <input id="pwInput" type="password" autofocus>
+    <div class="row">
+      <button value="cancel" formnovalidate>Cancelar</button>
+      <button value="ok" class="primary grow">Conectar</button>
+    </div>
+  </form>
+</dialog>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>

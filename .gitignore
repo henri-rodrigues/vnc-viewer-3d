@@ -1,0 +1,5 @@
+node_modules/
+*.log
+dist/
+# Lista real da empresa (IPs internos): fica fora do Git
+conexoes.csv

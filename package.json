@@ -1,0 +1,15 @@
+{
+  "name": "vnc-viewer-3d",
+  "version": "1.5.0",
+  "description": "Acesso remoto - 3D Ar Condicionado",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "build": "node tools/build-exe.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}
