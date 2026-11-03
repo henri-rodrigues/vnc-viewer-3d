@@ -13,8 +13,12 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.Windows.Forms, System.Drawing
-Add-Type -Namespace VncViewer3D -Name Dpi -MemberDefinition '[DllImport("user32.dll")] public static extern bool SetProcessDPIAware();'
-[void][VncViewer3D.Dpi]::SetProcessDPIAware()
+Add-Type -Namespace VncViewer3D -Name Win -MemberDefinition @'
+[DllImport("user32.dll")] public static extern bool SetProcessDPIAware();
+[DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr h, int cmd);
+[DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr h);
+'@
+[void][VncViewer3D.Win]::SetProcessDPIAware()
 [System.Windows.Forms.Application]::EnableVisualStyles()
 
 $AppName = 'VNC Viewer 3D'
@@ -431,6 +435,15 @@ $form.Add_FormClosing({
     $msg = $(if ($Mode -eq 'uninstall') { 'Cancelar a desinstalação?' } else { 'Cancelar a instalação?' })
     if ([Windows.Forms.MessageBox]::Show($form, $msg, $AppName, 'YesNo', 'Question') -ne 'Yes') { $e.Cancel = $true }
     else { Set-Result 'cancelado' }
+})
+
+# Quem abriu o PowerShell pode ter pedido "janela escondida": o Windows aplica
+# isso à primeira janela do processo, e o assistente ficaria invisível.
+# Força a janela a aparecer, na frente das outras.
+$form.Add_Shown({
+    [void][VncViewer3D.Win]::ShowWindow($form.Handle, 5)  # SW_SHOW
+    $form.TopMost = $true; $form.Activate(); $form.TopMost = $false
+    [void][VncViewer3D.Win]::SetForegroundWindow($form.Handle)
 })
 
 Show-Page

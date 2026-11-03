@@ -1,6 +1,6 @@
 {
   "name": "vnc-viewer-3d",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "Acesso remoto - 3D Ar Condicionado",
   "main": "server.js",
   "scripts": {

@@ -103,6 +103,28 @@ async function silentInstall() {
   spawn(exe, [], { detached: true, stdio: 'ignore', cwd: DEFAULT_DIR }).unref();
 }
 
+// Abre o assistente pelo wscript, que esconde só o console do PowerShell.
+// Abrindo direto pelo Node (windowsHide), o Windows escondia também a janela
+// do assistente: o .exe "carregava e não acontecia nada".
+//  wait = true:  espera o assistente fechar e devolve o código de saída;
+//  wait = false: deixa rodando solto (sobrevive ao fechamento deste .exe,
+//                necessário na desinstalação, que apaga o próprio .exe).
+function runWizard(dir, params, wait) {
+  const cmdline = ['powershell', ...wizardArgs(dir, params)].map((a) => `"${a.replace(/"/g, '\\"')}"`).join(' ');
+  const vbs = path.join(dir, 'abrir.vbs');
+  // UTF-16 com BOM: o wscript lê assim caminhos com acento.
+  fs.writeFileSync(vbs, `﻿WScript.Quit CreateObject("WScript.Shell").Run("${cmdline.replace(/"/g, '""')}", 0, ${wait ? 'True' : 'False'})\r\n`, 'utf16le');
+  if (!wait) {
+    spawn('wscript.exe', [vbs], { detached: true, stdio: 'ignore' }).unref();
+    return Promise.resolve(0);
+  }
+  return new Promise((resolve) => {
+    const p = spawn('wscript.exe', [vbs], { stdio: 'ignore' });
+    p.on('exit', resolve);
+    p.on('error', () => resolve(-1));
+  });
+}
+
 // ---------- decisão ----------
 // Retorna true se este processo deve continuar e iniciar o servidor.
 async function ensureInstalled() {
@@ -110,19 +132,10 @@ async function ensureInstalled() {
   const info = installedInfo();
 
   if (process.argv.includes('--desinstalar')) {
-    const dir = extractWizard();
-    // O assistente precisa continuar rodando depois que este .exe fechar (para
-    // poder apagá-lo). Filhos normais do Node são encerrados junto com ele, e
-    // "detached" abre o PowerShell sem console (ele fecha na hora). Por isso o
-    // PowerShell é aberto pelo wscript, que roda solto e esconde a janela.
-    const args = wizardArgs(dir, {
+    // O assistente espera este processo fechar para poder apagar o .exe.
+    await runWizard(extractWizard(), {
       Mode: 'uninstall', CurrentDir: info?.dir || here, Version: version(), WaitPid: process.pid,
-    });
-    const cmdline = ['powershell', ...args].map((a) => `"${a.replace(/"/g, '\\"')}"`).join(' ');
-    const vbs = path.join(dir, 'abrir.vbs');
-    // UTF-16 com BOM: o wscript lê assim caminhos com acento.
-    fs.writeFileSync(vbs, `﻿CreateObject("WScript.Shell").Run "${cmdline.replace(/"/g, '""')}", 0, False\r\n`, 'utf16le');
-    spawn('wscript.exe', [vbs], { detached: true, stdio: 'ignore' }).unref();
+    }, false);
     await new Promise((r) => setTimeout(r, 1500));
     return false;
   }
@@ -130,14 +143,10 @@ async function ensureInstalled() {
   if (info && samePath(here, info.dir)) return true;
 
   const dir = extractWizard();
-  const code = await new Promise((resolve) => {
-    const p = spawn('powershell', wizardArgs(dir, {
-      Mode: 'install', Source: process.execPath, Version: version(),
-      CurrentDir: info?.dir, CurrentVersion: info?.version,
-    }), { stdio: 'ignore', windowsHide: true });
-    p.on('exit', resolve);
-    p.on('error', () => resolve(-1));
-  });
+  const code = await runWizard(dir, {
+    Mode: 'install', Source: process.execPath, Version: version(),
+    CurrentDir: info?.dir, CurrentVersion: info?.version,
+  }, true);
   const result = (() => { try { return fs.readFileSync(path.join(dir, 'resultado.txt'), 'utf8').trim(); } catch { return ''; } })();
   fs.rm(dir, { recursive: true, force: true }, () => {});
 
